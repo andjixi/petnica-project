@@ -1,19 +1,20 @@
-type tip = number;
+type tip = string;
 declare class Node {
     key: tip;
-    value: tip;
+    value: number;
     left?: Node;
     right?: Node;
-    height: tip;
-    constructor(key: tip, value: tip);
+    height: number;
+    constructor(key: tip, value: number);
 }
 export declare class IAVLPlus {
     root?: Node;
     constructor();
     print(): void;
+    private isLeaf;
     printNode(node: Node): void;
     private insertNode;
-    put(key: tip, value: tip): void;
+    put(key: tip, value: number): void;
     private updateNode;
     private getHeight;
     private getBalance;

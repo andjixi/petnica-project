@@ -17,10 +17,12 @@ class IAVLPlus {
     print() {
         this.printNode(this.root);
     }
+    isLeaf(node) {
+        return node.left === null && node.right == null;
+    }
     printNode(node) {
         if (node == null)
             return;
-        console.log(node.key, node.value);
         this.printNode(node.left);
         this.printNode(node.right);
     }
@@ -28,35 +30,48 @@ class IAVLPlus {
         if (node === null) {
             return new Node(key, value);
         }
+        if (this.isLeaf(node)) {
+            if (key < node.key) {
+                let newNode = new Node(node.key, -1);
+                newNode.left = new Node(key, value);
+                newNode.right = new Node(node.key, node.value);
+                node = newNode;
+                return newNode;
+            }
+            else if (key > node.key) {
+                let newNode = new Node(key, -1);
+                newNode.left = new Node(node.key, node.value);
+                newNode.right = new Node(key, value);
+                node = newNode;
+                return newNode;
+            }
+            else {
+                node.value = value;
+                return node;
+            }
+        }
         if (key < node.key) {
             node.left = this.insertNode(node.left, key, value);
         }
-        else if (key > node.key) {
+        else {
             node.right = this.insertNode(node.right, key, value);
         }
-        else {
-            // Duplicate keys are not allowed, update the value instead
-            node.value = value;
-            return node;
-        }
-        // Update height and balance the tree
         this.updateNode(node);
-        // Check the balance factor and perform rotations if necessary
         const balance = this.getBalance(node);
-        // Left heavy
+        // left heavy
         if (balance > 1 && key < node.left.key) {
             return this.rotateRight(node);
         }
-        // Right heavy
+        // right heavy
         if (balance < -1 && key > node.right.key) {
             return this.rotateLeft(node);
         }
-        // Left-right heavy
+        // left-right heavy
         if (balance > 1 && key > node.left.key) {
             node.left = this.rotateLeft(node.left);
             return this.rotateRight(node);
         }
-        // Right-left heavy
+        // right-left heavy
         if (balance < -1 && key < node.right.key) {
             node.right = this.rotateRight(node.right);
             return this.rotateLeft(node);
@@ -69,11 +84,9 @@ class IAVLPlus {
     updateNode(node) {
         node.height = Math.max(this.getHeight(node.left), this.getHeight(node.right)) + 1;
     }
-    // Get the height of a node
     getHeight(node) {
         return node ? node.height : 0;
     }
-    // Get the balance factor of a node
     getBalance(node) {
         return node ? this.getHeight(node.left) - this.getHeight(node.right) : 0;
     }
@@ -86,7 +99,6 @@ class IAVLPlus {
         this.updateNode(x);
         return x;
     }
-    // Rotate left
     rotateLeft(x) {
         const y = x.right;
         const T2 = y.left;
@@ -98,11 +110,17 @@ class IAVLPlus {
     }
     getNode(node, key) {
         if (node === null) {
-            console.log('nema kljucaa');
+            console.log('no key found!');
             return;
         }
-        if (node.key == key) {
-            console.log(`vrednost je ${node.value}`);
+        if (this.isLeaf(node) && node.key == key) {
+            if (node.value == -1) {
+                console.log('no key found!');
+                this.del(key);
+            }
+            else {
+                console.log(`the value associated with the key ${key} is ${node.value}`);
+            }
         }
         else if (node.key > key) {
             this.getNode(node.left, key);
@@ -124,53 +142,49 @@ class IAVLPlus {
         }
         return current;
     }
-    // Private method to delete a node and balance the tree
     deleteNode(node, key) {
         if (node === null) {
             return null;
         }
-        // Perform standard BST delete
-        if (key < node.key) {
-            node.left = this.deleteNode(node.left, key);
+        if (this.isLeaf(node) && node.key != key) {
+            return null;
         }
-        else if (key > node.key) {
-            node.right = this.deleteNode(node.right, key);
-        }
-        else {
-            // Node to be deleted found
-            // Case 1: Node with only one child or no child
+        if (this.isLeaf(node) && node.key == key) {
+            // node with only one child or no child
             if (node.left === null) {
                 return node.right;
             }
             else if (node.right === null) {
                 return node.left;
             }
-            // Case 2: Node with two children
-            // Get the inorder successor (smallest in the right subtree)
+            // node with two children
             const temp = this.getMinValueNode(node.right);
             node.key = temp.key;
             node.value = temp.value;
-            // Delete the inorder successor
             node.right = this.deleteNode(node.right, temp.key);
         }
-        // Update height and balance the tree
+        if (key < node.key) {
+            node.left = this.deleteNode(node.left, key);
+        }
+        else {
+            node.right = this.deleteNode(node.right, key);
+        }
         this.updateNode(node);
-        // Check the balance factor and perform rotations if necessary
         const balance = this.getBalance(node);
-        // Left heavy
+        // left heavy
         if (balance > 1 && this.getBalance(node.left) >= 0) {
             return this.rotateRight(node);
         }
-        // Left-right heavy
+        // left-right heavy
         if (balance > 1 && this.getBalance(node.left) < 0) {
             node.left = this.rotateLeft(node.left);
             return this.rotateRight(node);
         }
-        // Right heavy
+        // right heavy
         if (balance < -1 && this.getBalance(node.right) <= 0) {
             return this.rotateLeft(node);
         }
-        // Right-left heavy
+        // right-left heavy
         if (balance < -1 && this.getBalance(node.right) > 0) {
             node.right = this.rotateRight(node.right);
             return this.rotateLeft(node);

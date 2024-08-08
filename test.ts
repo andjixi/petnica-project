@@ -1,19 +1,25 @@
-import { IAVLPlus } from "./iavl";
+import { IAVLPlus } from "./iavl"
 
 function main(): void {
-    let tree: IAVLPlus = new IAVLPlus();
-    tree.put(12,32);
-    tree.put(18,36);
-    tree.put(28,36);
-    tree.put(38,36);
-    tree.put(48,36);
-    tree.put(58,36);
+    let tree: IAVLPlus = new IAVLPlus()
+    tree.put("12",32)
+    tree.put("13",36)
+    tree.put("11",46)
     
-    tree.print();
+    tree.print()
 
-    tree.get(18);
-    tree.del(18);
-    tree.get(18);
+    tree.get("13")
+    tree.get("12")
+    tree.get("11")
+    tree.del("12")
+    tree.del("13")
+    tree.del("11")
+    tree.print()
+    tree.get("11")
+    tree.get("12")
+    tree.get("13")
+    tree.get("12")
+    tree.print()
 }
 
-main();
+main()

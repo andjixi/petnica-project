@@ -1,4 +1,3 @@
-import { isLeftHandSideExpression } from "typescript"
 
 type tip = string
 

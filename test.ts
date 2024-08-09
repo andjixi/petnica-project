@@ -1,4 +1,4 @@
-import { IAVLPlus } from "./iavl"
+/*import { IAVLPlus } from "iavl"
 
 function main(): void {
     let tree: IAVLPlus = new IAVLPlus()
@@ -23,3 +23,4 @@ function main(): void {
 }
 
 main()
+*/

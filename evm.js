@@ -5,6 +5,7 @@ const common_1 = require("@ethereumjs/common");
 const evm_1 = require("@ethereumjs/evm");
 const statemanager_1 = require("@ethereumjs/statemanager");
 const util_1 = require("@ethereumjs/util");
+const iavl_1 = require("./iavl/iavl");
 const TEST_ADDRESS = util_1.Address.fromString("0x388C818CA8B9251b393131C08a736A67ccB19297");
 const main = async () => {
     const common = new common_1.Common({ chain: common_1.Chain.Mainnet, hardfork: common_1.Hardfork.Shanghai });
@@ -21,11 +22,21 @@ const main = async () => {
     const PUSH1 = '60';
     const SSTORE = '55';
     const SLOAD = '54';
+    let iavlStateTree = new iavl_1.IAVLPlus();
     // Note that numbers added are hex values, so '20' would be '32' as decimal e.g.
-    const code = [PUSH1, '03', PUSH1, '07', SSTORE, PUSH1, '07', SLOAD, STOP];
+    const code = [PUSH1, '03', PUSH1, '07', SSTORE, PUSH1, '03', SLOAD, STOP];
     evm.events.on('step', function (data) {
         // Note that data.stack is not immutable, i.e. it is a reference to the vm's internal stack object
         console.log(`Opcode: ${data.opcode.name}\tStack: ${data.stack}	`);
+        if (data.opcode.name == "SSTORE") {
+            console.log('store' + data.stack[0].toString());
+            iavlStateTree.put(data.stack[0].toString(), Number(data.stack[1]));
+        }
+        if (data.opcode.name == "SLOAD") {
+            console.log('load' + data.stack[0].toString());
+            iavlStateTree.get(data.stack[0].toString());
+        }
+        iavlStateTree.print();
     });
     const results = await evm.runCode({
         code: (0, util_1.hexToBytes)(('0x' + code.join(''))),

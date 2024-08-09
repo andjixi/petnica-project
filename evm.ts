@@ -5,6 +5,7 @@ import { DefaultStateManager } from '@ethereumjs/statemanager'
 import { bytesToHex, hexToBytes, Address } from '@ethereumjs/util'
 
 import type { PrefixedHexString } from '@ethereumjs/util'
+import { IAVLPlus } from './iavl/iavl'
 
 const TEST_ADDRESS = Address.fromString("0x388C818CA8B9251b393131C08a736A67ccB19297")
 
@@ -27,13 +28,27 @@ const main = async () => {
 	const PUSH1 = '60'
 	const SSTORE = '55'
 	const SLOAD = '54'
-
+	let iavlStateTree = new IAVLPlus()
 	// Note that numbers added are hex values, so '20' would be '32' as decimal e.g.
-	const code = [PUSH1, '03', PUSH1, '07', SSTORE, PUSH1, '07', SLOAD, STOP]
+	const code = [PUSH1, '03', PUSH1, '07', SSTORE, PUSH1, '03', SLOAD, STOP]
 
 	evm.events.on('step', function (data) {
 	// Note that data.stack is not immutable, i.e. it is a reference to the vm's internal stack object
 	console.log(`Opcode: ${data.opcode.name}\tStack: ${data.stack}	`)
+
+	
+
+	if (data.opcode.name == "SSTORE") {
+		console.log('store' + data.stack[0].toString())
+		iavlStateTree.put(data.stack[0].toString(), Number(data.stack[1]))
+	}
+	if (data.opcode.name == "SLOAD") {
+		console.log('load' + data.stack[0].toString())
+		iavlStateTree.get(data.stack[0].toString())
+	}
+
+	iavlStateTree.print()
+
 	})
 
 	const results = await evm.runCode({
@@ -48,6 +63,8 @@ const main = async () => {
 	console.log(`State root: ${stateRootHex}`)
 	console.log(`Returned: ${bytesToHex(results.returnValue)}`)
 	console.log(`gasUsed: ${results.executionGasUsed.toString()}`)
+
+
 }
 
 main()

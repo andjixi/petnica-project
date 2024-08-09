@@ -39,11 +39,9 @@ const main = async () => {
 	
 
 	if (data.opcode.name == "SSTORE") {
-		console.log('store' + data.stack[0].toString())
 		iavlStateTree.put(data.stack[0].toString(), Number(data.stack[1]))
 	}
 	if (data.opcode.name == "SLOAD") {
-		console.log('load' + data.stack[0].toString())
 		iavlStateTree.get(data.stack[0].toString())
 	}
 
